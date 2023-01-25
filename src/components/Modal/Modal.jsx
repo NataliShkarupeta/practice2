@@ -28,7 +28,7 @@ export const Modal = ({ currentImg: { src, alt }, close }) => {
   );
 };
 
-
+//
 // export class Modal extends Component {
 
 // componentDidMount(){
