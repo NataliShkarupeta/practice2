@@ -3,20 +3,17 @@ import { MoviesGallery } from './MoviesGallery/MoviesGallery';
 import { Modal } from './Modal/Modal';
 import { Button } from './Button/Button';
 import { fetchMovies } from 'service/movies-api';
+import { InputValue } from './Form/Form';
 
 export const App = () => {
   const [movies, setmovies] = useState([]);
   const [currentImg, setcurrentImg] = useState(null);
-  const [isListShown, setisListShown] = useState(false);
+  const [query, setQuery] = useState('');
   const [isLoading, setisLoading] = useState(false);
   const [page, setpage] = useState(1);
 
   const showPoster = data => {
     setcurrentImg(data);
-  };
-
-  const showMovies = () => {
-    setisListShown(prevState => !prevState);
   };
 
   const loadMore = () => {
@@ -31,31 +28,30 @@ export const App = () => {
     setcurrentImg(null);
   };
 
+  const changeSearchValue = query => {
+    setQuery(query);
+    setmovies([]);
+    setpage(1);
+  };
+
   useEffect(() => {
-    if (isListShown) {
+    console.log(query);
+    if (query !== '') {
       setisLoading(true);
-      fetchMovies(page)
+      fetchMovies(page, query)
         .then(data => {
           setmovies(prevMovies => [...prevMovies, ...data.data.results]);
         })
         .catch(error => console.log(error))
         .finally(() => setisLoading(false));
     }
-    if(!isListShown){
-      setpage(1)
-      setmovies([])
-    }
-  }, [isListShown, page]);
-
-
+  }, [page, query]);
 
   return (
     <>
-      <Button
-        clickHandler={showMovies}
-        text={isListShown ? 'Hide Movies List' : 'Show Movies List'}
-      />
-      {isListShown && (
+      <InputValue changeSearch={changeSearchValue} />
+
+      {movies.length > 0 && (
         <>
           <MoviesGallery
             movies={movies}
@@ -65,6 +61,7 @@ export const App = () => {
           <Button text="Load more" clickHandler={loadMore} />
         </>
       )}
+
       {currentImg && <Modal currentImg={currentImg} close={closeModal} />}
       {isLoading && <p>Loading....</p>}
     </>
